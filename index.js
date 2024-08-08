@@ -1,10 +1,33 @@
 import express from "express";
 import bodyParser from "body-parser";
+import pg from "pg";
 
 const app = express();
 const port = 3000;
 
+//Configurate DB and establish connection
+const db = new pg.Client({
+  user: "postgres",
+  host: "localhost",
+  database: "world",
+  password:"201338192Mb@s@",
+  port: 5432
+});
+
+db.connect();
+
 let totalCorrect = 0;
+let quiz = [];
+
+db.query("SELECT * FROM flags", (error, res) =>{
+  //Check to see if there is an error
+  if(error){
+    console.log("There is an error", error.stack);
+  } else{
+    quiz = res.rows;
+  }
+  db.end();
+});
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -24,7 +47,7 @@ app.get("/", (req, res) => {
 app.post("/submit", (req, res) => {
   let answer = req.body.answer.trim();
   let isCorrect = false;
-  if (currentQuestion.capital.toLowerCase() === answer.toLowerCase()) {
+  if (currentQuestion.name.toLowerCase() === answer.toLowerCase()) {
     totalCorrect++;
     console.log(totalCorrect);
     isCorrect = true;
